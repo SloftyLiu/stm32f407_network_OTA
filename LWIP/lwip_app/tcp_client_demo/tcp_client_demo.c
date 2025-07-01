@@ -8,22 +8,9 @@
 #include "stdio.h"
 #include "string.h"
 #include "ff.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK STM32开发板
-//TCP Client 测试代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2016/1/25
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-//*******************************************************************************
-//修改信息
-//无
-////////////////////////////////////////////////////////////////////////////////// 	   
- 
+
+FATFS fs;
+
 //TCP Client接收数据缓冲区
 u8 tcp_client_recvbuf[TCP_CLIENT_RX_BUFSIZE];	
 //TCP服务器发送数据内容
@@ -214,7 +201,7 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		delay_ms(100);
 		//TODO:
 		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
-		
+		//f_mount(&fs,"1:",1);
 		
 		
 		
@@ -331,25 +318,3 @@ void tcp_client_connection_close(struct tcp_pcb *tpcb, struct tcp_client_struct 
 	if(es)mem_free(es); 
 	tcp_client_flag&=~(1<<5);//标记连接断开了
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -16,9 +16,7 @@
 #include "lwip_comm.h"
 #include "lwipopts.h"
 #include "tcp_client_demo.h"
-#include "tcp_server_demo.h"
-#include "udp_demo.h"
-#include "httpd.h"
+
 /************************************************
  ALIENTEK 探索者STM32F407开发板 实验58
  网络通信实验-HAL库函数版
@@ -56,19 +54,13 @@ void lwip_test_ui(u8 mode)
 		speed=LAN8720_Get_Speed();//得到网速
 		if(speed&1<<1)LCD_ShowString(30,150,200,16,16,"Ethernet Speed:100M");
 		else LCD_ShowString(30,150,200,16,16,"Ethernet Speed:10M");
-		LCD_ShowString(30,170,200,16,16,"KEY0:TCP Server Test");
-		LCD_ShowString(30,190,200,16,16,"KEY1:TCP Client Test");
-		LCD_ShowString(30,210,200,16,16,"KEY2:UDP Test");
 	}
 }
 
 int main(void)
 {
-    u8 t;
-	u8 key;
-	
-    HAL_Init();                   	//初始化HAL库    
-    Stm32_Clock_Init(336,8,2,7);  	//设置时钟,168Mhz
+  HAL_Init();                   	//初始化HAL库    
+  Stm32_Clock_Init(336,8,2,7);  	//设置时钟,168Mhz
 	delay_init(168);               	//初始化延时函数
 	uart_init(115200);             	//初始化USART
 	usmart_dev.init(84); 		    //初始化USMART
@@ -85,26 +77,29 @@ int main(void)
 	my_mem_init(SRAMEX);			//初始化外部内存池
 	my_mem_init(SRAMCCM);			//初始化CCM内存池
 	
-   	POINT_COLOR=RED;
+  POINT_COLOR=RED;
 	LED0=0;
 	lwip_test_ui(1);			    //加载前半部分UI
-    LCD_ShowString(30,110,200,16,16,"lwIP Initing...");
+  LCD_ShowString(30,110,200,16,16,"lwIP Initing...");
 	while(lwip_comm_init())         //lwip初始化
 	{
 		LCD_ShowString(30,110,200,20,16,"LWIP Init Falied! ");
 		delay_ms(500);
 		LCD_ShowString(30,110,200,16,16,"Retrying...       ");
-        delay_ms(500);
+    delay_ms(500);
 	}
 	LCD_ShowString(30,110,200,20,16,"LWIP Init Success!");
  	LCD_ShowString(30,130,200,16,16,"DHCP IP configing...");  //等待DHCP获取 
+	
 #if LWIP_DHCP   //使用DHCP
 	while((lwipdev.dhcpstatus!=2)&&(lwipdev.dhcpstatus!=0XFF))//等待DHCP获取成功/超时溢出
 	{  
 		lwip_periodic_handle();	//LWIP内核需要定时处理的函数
 	}
 #endif
-  lwip_test_ui(2);		//加载后半部分UI 
+	
+  //lwip_test_ui(2);		//加载后半部分UI
+
 	while(1)
 	{
 		tcp_client_test();
