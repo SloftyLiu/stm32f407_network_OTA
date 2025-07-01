@@ -23,7 +23,7 @@
 //无
 ////////////////////////////////////////////////////////////////////////////////// 	   
   
-#define TCP_CLIENT_RX_BUFSIZE	200		//定义tcp client最大接收数据长度
+#define TCP_CLIENT_RX_BUFSIZE	1500		//定义tcp client最大接收数据长度
 #define	TCP_CLIENT_PORT			8087	//定义tcp client要连接的远端端口
 
 //tcp服务器连接状态

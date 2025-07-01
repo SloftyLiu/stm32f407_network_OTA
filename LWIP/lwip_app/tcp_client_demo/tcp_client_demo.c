@@ -177,6 +177,15 @@ err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
 	}
 	return err;
 }
+
+typedef enum 
+{
+	UPDATE_FREE = 0,
+	UPDATE_BUSY,
+	UPDATE_OVER
+} update_state_typedef;
+update_state_typedef update_state = UPDATE_FREE;
+
 //lwIP tcp_recv()函数的回调函数
 err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 { 
@@ -203,28 +212,56 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
 		//f_mount(&fs,"1:",1);
 		
-		
-		
-		if(p!=NULL)//当处于连接状态并且接收到的数据不为空时
+		switch(update_state)
 		{
-			memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);  //数据接收缓冲区清零
-			for(q=p;q!=NULL;q=q->next)  //遍历完整个pbuf链表
-			{
-				//判断要拷贝到TCP_CLIENT_RX_BUFSIZE中的数据是否大于TCP_CLIENT_RX_BUFSIZE的剩余空间，如果大于
-				//的话就只拷贝TCP_CLIENT_RX_BUFSIZE中剩余长度的数据，否则的话就拷贝所有的数据
-				if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//拷贝数据
-				else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
-				data_len += q->len;  	
-				if(data_len > TCP_CLIENT_RX_BUFSIZE) 
+			case UPDATE_FREE:
+				memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
+				for(q=p;q!=NULL;q=q->next)
 				{
-					break; //超出TCP客户端接收数组,跳出	
+					if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//????
+					else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
+					data_len += q->len;  	
+					if(data_len > TCP_CLIENT_RX_BUFSIZE) 
+					{
+						break;
+					}
 				}
-			}
-			tcp_client_flag|=1<<6;		//标记接收到数据了
- 			tcp_recved(tpcb,p->tot_len);//用于获取接收数据,通知LWIP可以获取更多数据
-			pbuf_free(p);  	//释放内存
-			ret_err=ERR_OK;
-		}
+				if(0 == memcmp(tcp_client_recvbuf,"UPDATE!",7))
+				{
+					update_state = UPDATE_BUSY;
+					printf("UPDATE go busy!\r\n");
+				}
+				break;
+			case UPDATE_BUSY:
+				update_state = UPDATE_OVER;
+				printf("UPDATE now busy!\r\n");
+				break;
+			case UPDATE_OVER:
+				memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
+				for(q=p;q!=NULL;q=q->next)
+				{
+					if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//????
+					else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
+					data_len += q->len;  	
+					if(data_len > TCP_CLIENT_RX_BUFSIZE) 
+					{
+						break;
+					}
+				}
+				if(0 == memcmp(tcp_client_recvbuf,"OVER!",5))
+				{
+					update_state = UPDATE_FREE;
+					printf("UPDATE go free!\r\n");
+				}
+				update_state = UPDATE_FREE;
+				break;
+		}		
+	
+			
+		tcp_client_flag|=1<<6;		//标记接收到数据了
+		tcp_recved(tpcb,p->tot_len);//用于获取接收数据,通知LWIP可以获取更多数据
+		pbuf_free(p);  	//释放内存
+		ret_err=ERR_OK;
 	}else  //接收到数据但是连接已经关闭,
 	{ 
 		tcp_recved(tpcb,p->tot_len);//用于获取接收数据,通知LWIP可以获取更多数据
