@@ -186,6 +186,13 @@ typedef enum
 } update_state_typedef;
 update_state_typedef update_state = UPDATE_FREE;
 
+typedef enum 
+{
+	REV_IDLE = 0,
+	REV_FILL,
+} recieve_state_typedef;
+u8 recieve_state = 0;
+u32 recieve_num = 0;
 //lwIP tcp_recv()函数的回调函数
 err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 { 
@@ -212,47 +219,68 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
 		//f_mount(&fs,"1:",1);
 		
+		
+		memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
+		for(q=p;q!=NULL;q=q->next)
+		{
+			if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//????
+			else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
+			data_len += q->len;  	
+			if(data_len > TCP_CLIENT_RX_BUFSIZE) 
+			{
+				break;
+			}	
+		}
+		
+		u32 pData = 0;
+		u32 pTest = 0;
+		u8 test1[1500];
+
+		while(pData < data_len)
+		{
+			if(pTest == 0)
+			{
+				recieve_num = *((u32 *)(tcp_client_recvbuf + pData));
+				pData += sizeof(u32);
+				if(recieve_num <= (data_len - pData))
+				{
+					memcpy((tcp_client_recvbuf + pData), test1, recieve_num);
+					pData += recieve_num;
+					/*pack process proc(test1)*/
+				}
+				else
+				{
+					memcpy((tcp_client_recvbuf + pData), test1, data_len - pData);
+					pData += data_len - pData;
+					// should break;
+				}
+			}
+			else
+			{
+				memcpy((tcp_client_recvbuf), test1 + pTest, 0/*remain data*/);
+				pData += 0/*remain data*/;
+				if(1/*no remain*/)
+				{
+					/*pack process proc(test1)*/
+					pTest = 0;
+				}
+				else
+				{
+					//
+				}
+			}
+		}
+
+		
 		switch(update_state)
 		{
 			case UPDATE_FREE:
-				memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
-				for(q=p;q!=NULL;q=q->next)
-				{
-					if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//????
-					else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
-					data_len += q->len;  	
-					if(data_len > TCP_CLIENT_RX_BUFSIZE) 
-					{
-						break;
-					}
-				}
-				if(0 == memcmp(tcp_client_recvbuf,"UPDATE!",7))
-				{
-					update_state = UPDATE_BUSY;
-					printf("UPDATE go busy!\r\n");
-				}
 				break;
 			case UPDATE_BUSY:
 				update_state = UPDATE_OVER;
 				printf("UPDATE now busy!\r\n");
 				break;
 			case UPDATE_OVER:
-				memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
-				for(q=p;q!=NULL;q=q->next)
-				{
-					if(q->len > (TCP_CLIENT_RX_BUFSIZE-data_len)) memcpy(tcp_client_recvbuf+data_len,q->payload,(TCP_CLIENT_RX_BUFSIZE-data_len));//????
-					else memcpy(tcp_client_recvbuf+data_len,q->payload,q->len);
-					data_len += q->len;  	
-					if(data_len > TCP_CLIENT_RX_BUFSIZE) 
-					{
-						break;
-					}
-				}
-				if(0 == memcmp(tcp_client_recvbuf,"OVER!",5))
-				{
-					update_state = UPDATE_FREE;
-					printf("UPDATE go free!\r\n");
-				}
 				update_state = UPDATE_FREE;
 				break;
 		}		
