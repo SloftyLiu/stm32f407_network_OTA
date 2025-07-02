@@ -193,6 +193,65 @@ typedef enum
 } recieve_state_typedef;
 u8 recieve_state = 0;
 u32 recieve_num = 0;
+u32 pTest = 0;
+u8 test1[1500];
+
+FATFS fs;
+FIL file;
+u32 file_writed = 0;
+u32 file_size = 0;
+void update_process(u8 *buf, u32 size)
+{
+	switch(update_state)
+	{
+		case UPDATE_FREE:
+		{
+			if(0 == memcmp(buf,"update start", 12))
+			{
+				u8 res = 0;
+				file_size = 0;
+				file_writed = 0;
+				sscanf(buf, "update start:%d", &file_size);
+				printf("update start:%d\r\n",file_size);
+				res=f_mount(&fs,"1:",1); 				//挂载FLASH.	
+				if(res==FR_OK)//FLASH磁盘,FAT文件系统正常
+				{
+					printf("Flash disk OK!\r\n");
+				}
+				res=f_open(&file, "1:/firmware.bin", FA_WRITE | FA_CREATE_ALWAYS);
+				if(res==FR_OK)//FLASH磁盘,FAT文件系统正常
+				{
+					printf("firmware file OK!\r\n");
+				}				
+				update_state = UPDATE_BUSY;
+			}
+			break;
+		}
+		case UPDATE_BUSY:
+		{
+			UINT bw;
+      f_write(&file, buf, size, &bw);
+			file_writed += size;
+			if(file_writed == file_size)
+			{
+				update_state = UPDATE_OVER;
+			}
+			printf("UPDATE now busy!\r\n");
+			break;
+		}
+		case UPDATE_OVER:
+			if(0 == memcmp(buf,"update over", size))
+			{
+				f_close(&file);
+				printf("UPDATE over!\r\n");
+				update_state = UPDATE_FREE;
+			}
+			break;
+	}		
+}
+
+
+
 //lwIP tcp_recv()函数的回调函数
 err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 { 
@@ -213,8 +272,8 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		ret_err=err;
 	}else if(es->state==ES_TCPCLIENT_CONNECTED)	//当处于连接状态时
 	{
-		printf("rev size : %d\n",p->tot_len);
 		delay_ms(100);
+		printf("rec %d\r\n",p->tot_len);
 		//TODO:
 		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
 		//f_mount(&fs,"1:",1);
@@ -233,58 +292,50 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		}
 		
 		u32 pData = 0;
-		u32 pTest = 0;
-		u8 test1[1500];
 
 		while(pData < data_len)
 		{
 			if(pTest == 0)
 			{
-				recieve_num = *((u32 *)(tcp_client_recvbuf + pData));
+				recieve_num = *(u32 *)((u8 *)(tcp_client_recvbuf) + pData);
 				pData += sizeof(u32);
+				memset(test1,0,TCP_CLIENT_RX_BUFSIZE);
 				if(recieve_num <= (data_len - pData))
 				{
-					memcpy((tcp_client_recvbuf + pData), test1, recieve_num);
+					memcpy(test1, ((u8*)(tcp_client_recvbuf) + pData), recieve_num);
 					pData += recieve_num;
+					update_process(test1, recieve_num);
 					/*pack process proc(test1)*/
 				}
 				else
 				{
-					memcpy((tcp_client_recvbuf + pData), test1, data_len - pData);
+					pTest = 0;
+					memset(test1,0,TCP_CLIENT_RX_BUFSIZE);
+					memcpy(test1, ((u8*)(tcp_client_recvbuf) + pData), data_len - pData);
+					pTest = data_len - pData;
 					pData += data_len - pData;
 					// should break;
 				}
 			}
 			else
 			{
-				memcpy((tcp_client_recvbuf), test1 + pTest, 0/*remain data*/);
-				pData += 0/*remain data*/;
-				if(1/*no remain*/)
+				if( recieve_num - pTest <= data_len)
 				{
+					memcpy(((u8*)(test1) + pTest), tcp_client_recvbuf, recieve_num - pTest);
+					update_process(test1, recieve_num);
 					/*pack process proc(test1)*/
 					pTest = 0;
+					pData += recieve_num - pTest;
 				}
 				else
 				{
-					//
+					memcpy(((u8*)(test1) + pTest), tcp_client_recvbuf, data_len);
+					pTest += data_len;
+					pData += data_len;
 				}
 			}
 		}
 
-		
-		switch(update_state)
-		{
-			case UPDATE_FREE:
-				break;
-			case UPDATE_BUSY:
-				update_state = UPDATE_OVER;
-				printf("UPDATE now busy!\r\n");
-				break;
-			case UPDATE_OVER:
-				update_state = UPDATE_FREE;
-				break;
-		}		
-	
 			
 		tcp_client_flag|=1<<6;		//标记接收到数据了
 		tcp_recved(tpcb,p->tot_len);//用于获取接收数据,通知LWIP可以获取更多数据

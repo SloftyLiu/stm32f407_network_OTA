@@ -101,9 +101,7 @@
         <sRunDeb>0</sRunDeb>
         <sLrtime>0</sLrtime>
         <bEvRecOn>1</bEvRecOn>
-        <bSchkAxf>0</bSchkAxf>
-        <bTchkAxf>0</bTchkAxf>
-        <nTsel>4</nTsel>
+        <nTsel>3</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -157,18 +155,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>213</LineNumber>
+          <LineNumber>240</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134271384</Address>
+          <Address>134271448</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\git\STM32F407\瀹為獙55 缃戠粶閫氫俊瀹為獙\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c</Filename>
+          <Filename>..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Template\../LWIP/lwip_app/tcp_client_demo/tcp_client_demo.c\213</Expression>
+          <Expression>\\Template\../LWIP/lwip_app/tcp_client_demo/tcp_client_demo.c\240</Expression>
         </Bp>
       </Breakpoint>
       <Tracepoint>
@@ -215,7 +213,6 @@
       <pMultCmdsp></pMultCmdsp>
       <DebugDescription>
         <Enable>1</Enable>
-        <EnableFlashSeq>0</EnableFlashSeq>
         <EnableLog>0</EnableLog>
         <Protocol>2</Protocol>
         <DbgClock>10000000</DbgClock>

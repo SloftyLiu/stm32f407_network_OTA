@@ -18,6 +18,7 @@ import threading
 import os
 import struct
 
+import time
 
 class TCPServerUI:
     def __init__(self, root):
@@ -242,24 +243,29 @@ class TCPServerUI:
                     #file_info = f"{file_name}|{file_size}".encode('utf-8')
                     #client.send(struct.pack('I', len(file_info)))
                     #client.send(file_info)
-                    client.send("UPDATE!".encode('utf-8'))
+                    pack = f"update start:{file_size}".encode('utf-8')
+                    client.send(struct.pack('I', len(pack)) + pack)                    
+                    #client.send("dummy!".encode('utf-8'))
                     
-                    client.send("dummy!".encode('utf-8'))
-                    
-                    client.send("OVER!".encode('utf-8'))
+                    #client.send("OVER!".encode('utf-8'))
                     # 发送文件内容
-                    """
+                    
                     with open(self.selected_file, 'rb') as f:
                         sent_bytes = 0
                         while sent_bytes < file_size:
-                            chunk = f.read(4096)
+                            chunk = f.read(1024)
                             if not chunk:
                                 break
-                            client.send(chunk)
+                            pack = chunk
+                            client.send(struct.pack('I', len(pack)) + pack)   
+                            time.sleep(1)
                             sent_bytes += len(chunk)
                        
                     self.log_message(f"文件发送完成: {sent_bytes} 字节")
-                    """
+                    
+                    pack = "update over".encode('utf-8')
+                    client.send(struct.pack('I', len(pack)) + pack) 
+                    
                 except Exception as e:
                     self.log_message(f"发送文件到客户端失败: {str(e)}")
                     if client in self.clients:
