@@ -245,6 +245,7 @@ void update_process(u8 *buf, u32 size)
 				f_close(&file);
 				printf("UPDATE over!\r\n");
 				update_state = UPDATE_FREE;
+				NVIC_SystemReset();
 			}
 			break;
 	}		
@@ -272,7 +273,7 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		ret_err=err;
 	}else if(es->state==ES_TCPCLIENT_CONNECTED)	//当处于连接状态时
 	{
-		delay_ms(100);
+		//delay_ms(100);
 		printf("rec %d\r\n",p->tot_len);
 		//TODO:
 		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
@@ -324,8 +325,8 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 					memcpy(((u8*)(test1) + pTest), tcp_client_recvbuf, recieve_num - pTest);
 					update_process(test1, recieve_num);
 					/*pack process proc(test1)*/
-					pTest = 0;
 					pData += recieve_num - pTest;
+					pTest = 0;			
 				}
 				else
 				{

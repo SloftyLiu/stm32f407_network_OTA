@@ -258,7 +258,6 @@ class TCPServerUI:
                                 break
                             pack = chunk
                             client.send(struct.pack('I', len(pack)) + pack)   
-                            time.sleep(1)
                             sent_bytes += len(chunk)
                        
                     self.log_message(f"文件发送完成: {sent_bytes} 字节")

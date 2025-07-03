@@ -977,7 +977,7 @@ void LCD_Init(void)
 		LCD_WR_DATA(0x01);
 		LCD_WR_DATA(0xE0);
 		delay_ms(120);
-		LCD_WR_REG(0x21);
+		//LCD_WR_REG(0x21);
 		LCD_WR_REG(0x29);
 		LCD_WR_REG(0x2C);
 	}

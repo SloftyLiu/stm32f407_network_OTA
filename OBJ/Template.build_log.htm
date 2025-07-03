@@ -22,13 +22,20 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 E:\git\STM32F407\stm32f407_network_OTA\USER\NETWORK.uvprojx
-Project File Date:  07/02/2025
+Project File Date:  07/04/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'E:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'NETWORK'
+compiling tcp_client_demo.c...
+..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c(214): warning:  #167-D: argument of type "u8 *" is incompatible with parameter of type "const char *restrict"
+  				sscanf(buf, "update start:%d", &file_size);
+..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c: 1 warning, 0 errors
+linking...
+Program Size: Code=81790 RO-data=19806 RW-data=608 ZI-data=1230656  
+FromELF: creating hex file...
 After Build - User command #1: fromelf.exe  --bin -o  ..\firmware.bin ..\OBJ\Template.axf
-"..\OBJ\Template.axf" - 0 Error(s), 0 Warning(s).
+"..\OBJ\Template.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -42,7 +49,7 @@ Package Vendor: Keil
   E:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.11.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>
