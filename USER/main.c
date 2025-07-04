@@ -41,8 +41,8 @@ void lwip_test_ui(u8 mode)
 		LCD_Fill(30,30,lcddev.width,110,WHITE);	//«Â≥˝œ‘ æ
 		LCD_ShowString(30,30,200,16,16,"Explorer STM32F4");
 		LCD_ShowString(30,50,200,16,16,"Ethernet lwIP Test");
-		LCD_ShowString(30,70,200,16,16,"ATOM@ALIENTEK");
-		LCD_ShowString(30,90,200,16,16,"2017/5/15"); 	
+		LCD_ShowString(30,70,200,16,16,"Slofty");
+		LCD_ShowString(30,90,200,16,16,"2025/7/5"); 	
 	}
 	if(mode&1<<1)
 	{

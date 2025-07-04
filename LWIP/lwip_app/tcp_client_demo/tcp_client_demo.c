@@ -79,7 +79,7 @@ void tcp_client_test(void)
 	POINT_COLOR=RED; 	//ºìÉ«×ÖÌå
 	LCD_ShowString(30,30,200,16,16,"Explorer STM32F4");
 	LCD_ShowString(30,50,200,16,16,"TCP Client Test");
-	LCD_ShowString(30,70,200,16,16,"Slofty Liu");  
+	LCD_ShowString(30,70,200,16,16,"Slofty");  
 	LCD_ShowString(30,90,200,16,16,"KEY0:Send data");  
 	LCD_ShowString(30,110,200,16,16,"KEY_UP:Quit");  
 	tbuf=mymalloc(SRAMIN,200);	//ÉêÇëÄÚ´æ
