@@ -3,7 +3,7 @@
 <title>Static Call Graph - [..\OBJ\Template.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image ..\OBJ\Template.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Fri Jul 04 00:52:20 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sat Jul 05 00:56:57 2025
 <BR><P>
 <H3>Maximum Stack Usage =        656 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2095,9 +2095,9 @@ Global Symbols
 <P><STRONG><a name="[12c]"></a>XmRamInit</STRONG> (Thumb, 48 bytes, Stack size 16 bytes, xmram.o(i.XmRamInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = XmRamInit &rArr; sram_reg_read &rArr; sram_init &rArr; SRAM_GPIO_Set
 </UL>
-<BR>[Calls]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
+<BR>[Calls]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
 <LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xram_delay
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
 </UL>
 <BR>[Called By]<UL><LI><a href="#[12b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SRAM_Init
 </UL>
@@ -3312,7 +3312,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> tcp_client_demo.o(i.tcp_client_connected)
 </UL>
-<P><STRONG><a name="[7e]"></a>tcp_client_recv</STRONG> (Thumb, 334 bytes, Stack size 56 bytes, tcp_client_demo.o(i.tcp_client_recv))
+<P><STRONG><a name="[7e]"></a>tcp_client_recv</STRONG> (Thumb, 328 bytes, Stack size 56 bytes, tcp_client_demo.o(i.tcp_client_recv))
 <BR><BR>[Stack]<UL><LI>Max Depth = 576 + Unknown Stack Size
 <LI>Call Chain = tcp_client_recv &rArr; update_process &rArr; f_open &rArr; follow_path &rArr; dir_find &rArr; dir_next &rArr; create_chain &rArr; put_fat &rArr; move_window &rArr; sync_window &rArr; disk_write &rArr; W25QXX_Write &rArr; W25QXX_Write_NoCheck &rArr; W25QXX_Write_Page &rArr; W25QXX_Wait_Busy &rArr; W25QXX_ReadSR &rArr; SPI1_ReadWriteByte &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
@@ -3899,7 +3899,7 @@ Global Symbols
 <LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dhcp_decline
 </UL>
 
-<P><STRONG><a name="[202]"></a>update_process</STRONG> (Thumb, 192 bytes, Stack size 24 bytes, tcp_client_demo.o(i.update_process))
+<P><STRONG><a name="[202]"></a>update_process</STRONG> (Thumb, 200 bytes, Stack size 24 bytes, tcp_client_demo.o(i.update_process))
 <BR><BR>[Stack]<UL><LI>Max Depth = 520 + Unknown Stack Size
 <LI>Call Chain = update_process &rArr; f_open &rArr; follow_path &rArr; dir_find &rArr; dir_next &rArr; create_chain &rArr; put_fat &rArr; move_window &rArr; sync_window &rArr; disk_write &rArr; W25QXX_Write &rArr; W25QXX_Write_NoCheck &rArr; W25QXX_Write_Page &rArr; W25QXX_Wait_Busy &rArr; W25QXX_ReadSR &rArr; SPI1_ReadWriteByte &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
@@ -5183,13 +5183,13 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[1f1]"></a>addr_out</STRONG> (Thumb, 106 bytes, Stack size 0 bytes, xmram.o(i.addr_out))
-<BR><BR>[Called By]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<BR><BR>[Called By]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
 </UL>
 
 <P><STRONG><a name="[1f2]"></a>dataout</STRONG> (Thumb, 70 bytes, Stack size 0 bytes, xmram.o(i.dataout))
-<BR><BR>[Called By]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<BR><BR>[Called By]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
 </UL>
 
 <P><STRONG><a name="[1ef]"></a>sram_init</STRONG> (Thumb, 130 bytes, Stack size 16 bytes, xmram.o(i.sram_init))
@@ -5197,8 +5197,8 @@ Local Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SRAM_GPIO_Set
 </UL>
-<BR>[Called By]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<BR>[Called By]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
 </UL>
 
 <P><STRONG><a name="[144]"></a>sram_reg_read</STRONG> (Thumb, 446 bytes, Stack size 32 bytes, xmram.o(i.sram_reg_read))
@@ -5225,8 +5225,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[145]"></a>xram_delay</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, xmram.o(i.xram_delay))
-<BR><BR>[Called By]<UL><LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
-<LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<BR><BR>[Called By]<UL><LI><a href="#[143]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_write
+<LI><a href="#[144]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sram_reg_read
 <LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;XmRamInit
 </UL>
 

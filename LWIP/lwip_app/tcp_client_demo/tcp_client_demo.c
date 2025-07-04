@@ -186,20 +186,11 @@ typedef enum
 } update_state_typedef;
 update_state_typedef update_state = UPDATE_FREE;
 
-typedef enum 
-{
-	REV_IDLE = 0,
-	REV_FILL,
-} recieve_state_typedef;
-u8 recieve_state = 0;
-u32 recieve_num = 0;
-u32 pTest = 0;
-u8 test1[1500];
-
 FATFS fs;
 FIL file;
 u32 file_writed = 0;
 u32 file_size = 0;
+
 void update_process(u8 *buf, u32 size)
 {
 	switch(update_state)
@@ -236,21 +227,20 @@ void update_process(u8 *buf, u32 size)
 			{
 				update_state = UPDATE_OVER;
 			}
-			printf("UPDATE now busy!\r\n");
+			printf("Update progress : %d%%\r\n", file_writed * 100 / file_size);
 			break;
 		}
 		case UPDATE_OVER:
-			if(0 == memcmp(buf,"update over", size))
+			if(0 == memcmp(buf,"update finish", size))
 			{
 				f_close(&file);
-				printf("UPDATE over!\r\n");
+				printf("Update finsh!\r\n");
 				update_state = UPDATE_FREE;
 				NVIC_SystemReset();
 			}
 			break;
 	}		
 }
-
 
 
 //lwIP tcp_recv()函数的回调函数
@@ -260,6 +250,10 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 	struct pbuf *q;
 	struct tcp_client_struct *es;
 	err_t ret_err; 
+	static u32 pack_length = 0;
+	static u32 pack_buf_pointer = 0;
+	static u8 pack_buf[TCP_CLIENT_RX_BUFSIZE];
+	
 	LWIP_ASSERT("arg != NULL",arg != NULL);
 	es=(struct tcp_client_struct *)arg; 
 	if(p==NULL)//如果从服务器接收到空的数据帧就关闭连接
@@ -273,13 +267,8 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 		ret_err=err;
 	}else if(es->state==ES_TCPCLIENT_CONNECTED)	//当处于连接状态时
 	{
-		//delay_ms(100);
-		printf("rec %d\r\n",p->tot_len);
-		//TODO:
-		//在这里将接受到的数据写入文件，注意，要考虑文件头和结束标志
-		//f_mount(&fs,"1:",1);
-		
-		
+		//printf("rec %d\r\n",p->tot_len);
+	
 		memset(tcp_client_recvbuf,0,TCP_CLIENT_RX_BUFSIZE);
 		for(q=p;q!=NULL;q=q->next)
 		{
@@ -292,47 +281,49 @@ err_t tcp_client_recv(void *arg,struct tcp_pcb *tpcb,struct pbuf *p,err_t err)
 			}	
 		}
 		
-		u32 pData = 0;
+		u32 tcp_buf_pointer = 0;
 
-		while(pData < data_len)
+		while(tcp_buf_pointer < data_len)
 		{
-			if(pTest == 0)
+			if(pack_buf_pointer == 0)
 			{
-				recieve_num = *(u32 *)((u8 *)(tcp_client_recvbuf) + pData);
-				pData += sizeof(u32);
-				memset(test1,0,TCP_CLIENT_RX_BUFSIZE);
-				if(recieve_num <= (data_len - pData))
+				//获取包头，包头包含一包的长度信息
+				pack_length = *(u32 *)((u8 *)(tcp_client_recvbuf) + tcp_buf_pointer);
+				tcp_buf_pointer += sizeof(u32);
+				memset(pack_buf,0,TCP_CLIENT_RX_BUFSIZE);
+				if(pack_length <= (data_len - tcp_buf_pointer))
 				{
-					memcpy(test1, ((u8*)(tcp_client_recvbuf) + pData), recieve_num);
-					pData += recieve_num;
-					update_process(test1, recieve_num);
-					/*pack process proc(test1)*/
+					//当前tcp buffer中的数据足够一包，直接取
+					memcpy(pack_buf, ((u8*)(tcp_client_recvbuf) + tcp_buf_pointer), pack_length);
+					tcp_buf_pointer += pack_length;
+					update_process(pack_buf, pack_length);
 				}
 				else
 				{
-					pTest = 0;
-					memset(test1,0,TCP_CLIENT_RX_BUFSIZE);
-					memcpy(test1, ((u8*)(tcp_client_recvbuf) + pData), data_len - pData);
-					pTest = data_len - pData;
-					pData += data_len - pData;
-					// should break;
+					//当前tcp buffer中的数据不足够一包，将当前数据暂存起来，下一轮tcp buffer继续接收
+					pack_buf_pointer = 0;
+					memset(pack_buf,0,TCP_CLIENT_RX_BUFSIZE);
+					memcpy(pack_buf, ((u8*)(tcp_client_recvbuf) + tcp_buf_pointer), data_len - tcp_buf_pointer);
+					pack_buf_pointer = data_len - tcp_buf_pointer;
+					tcp_buf_pointer += data_len - tcp_buf_pointer;
 				}
 			}
 			else
 			{
-				if( recieve_num - pTest <= data_len)
+				if( pack_length - pack_buf_pointer <= data_len)
 				{
-					memcpy(((u8*)(test1) + pTest), tcp_client_recvbuf, recieve_num - pTest);
-					update_process(test1, recieve_num);
-					/*pack process proc(test1)*/
-					pData += recieve_num - pTest;
-					pTest = 0;			
+					//当前tcp buffer中的数据加上之前暂存的数据足够一包
+					memcpy(((u8*)(pack_buf) + pack_buf_pointer), tcp_client_recvbuf, pack_length - pack_buf_pointer);
+					update_process(pack_buf, pack_length);
+					tcp_buf_pointer += pack_length - pack_buf_pointer;
+					pack_buf_pointer = 0;			
 				}
 				else
 				{
-					memcpy(((u8*)(test1) + pTest), tcp_client_recvbuf, data_len);
-					pTest += data_len;
-					pData += data_len;
+					//当前tcp buffer中的数据加上之前暂存的数据仍旧不足一包，继续暂存，下一轮tcp buffer继续接收
+					memcpy(((u8*)(pack_buf) + pack_buf_pointer), tcp_client_recvbuf, data_len);
+					pack_buf_pointer += data_len;
+					tcp_buf_pointer += data_len;
 				}
 			}
 		}

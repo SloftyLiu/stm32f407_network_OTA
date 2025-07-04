@@ -262,7 +262,7 @@ class TCPServerUI:
                        
                     self.log_message(f"文件发送完成: {sent_bytes} 字节")
                     
-                    pack = "update over".encode('utf-8')
+                    pack = "update finish".encode('utf-8')
                     client.send(struct.pack('I', len(pack)) + pack) 
                     
                 except Exception as e:
