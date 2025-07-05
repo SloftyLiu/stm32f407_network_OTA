@@ -239,17 +239,11 @@ class TCPServerUI:
             # 向所有客户端发送文件
             for client in self.clients[:]:  # 创建副本以避免修改列表时的问题
                 try:
-                    # 发送文件信息
-                    #file_info = f"{file_name}|{file_size}".encode('utf-8')
-                    #client.send(struct.pack('I', len(file_info)))
-                    #client.send(file_info)
+                    # 发送文件大小信息
                     pack = f"update start:{file_size}".encode('utf-8')
-                    client.send(struct.pack('I', len(pack)) + pack)                    
-                    #client.send("dummy!".encode('utf-8'))
-                    
-                    #client.send("OVER!".encode('utf-8'))
+                    client.send(struct.pack('I', len(pack)) + pack)
+
                     # 发送文件内容
-                    
                     with open(self.selected_file, 'rb') as f:
                         sent_bytes = 0
                         while sent_bytes < file_size:
